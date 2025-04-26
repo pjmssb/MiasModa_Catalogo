@@ -1,0 +1,32 @@
+Sample File Naming Convention for Mias Moda Catalog Creator
+=========================================================
+
+Examples of actual file names in your directory:
+
+Product Type: Body
+- Body_Nubia-299900-1.jpg    (Main image)
+- Body_Nubia-299900-2.png    (Variation)
+- Body_Patricia-329900-1.jpg (Main image)
+- Body_Patricia-329900-2.jpg (Variation)
+- Body_Amelia-329900-1.jpg   (Main image)
+- Body_Amelia-329900-2.jpg   (Variation)
+
+Product Type: Leggins
+- Leggins_Faja_-_3104-337400-1.jpg
+- Leggins_Punto_Roma-159900-1.jpg
+- Leggins_Punto_Roma-159900-2.jpg
+- Leggins_Skinny_Brillos-349900-1.jpg
+
+Other Products:
+- Cinturilla_Ltex_Forrada-119900-1.png
+- Traje_de_bao_Karen-259900-1.jpg
+- Short_Faja_810-199900-1.jpg
+
+IMPORTANT RULES:
+1. Use underscores for spaces in product names
+2. Price is in pesos without $ symbol
+3. Number 1 is always the main image
+4. Numbers 2-6 are variations (will appear as circles)
+5. Files can be .jpg, .jpeg, or .png
+
+The script automatically handles these patterns and formats the prices with $ symbol.

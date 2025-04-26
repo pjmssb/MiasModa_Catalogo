@@ -3,10 +3,8 @@ venv/
 Create_catalog/venv/
 Create_catalog/new_catalog/
 Create_catalog/product_pictures/
-Create_catalog/
 Web_Scrapp_Photos/venv/
 Web_Scrapp_Photos/product_pictures/
-Web_Scrapp_Photos/
 
 # Variables de entorno
 .env
