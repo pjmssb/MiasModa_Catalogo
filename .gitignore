@@ -1,0 +1,46 @@
+# Entornos virtuales
+venv/
+Create_catalog/venv/
+Create_catalog/new_catalog/
+Create_catalog/product_pictures/
+Create_catalog/
+Web_Scrapp_Photos/venv/
+Web_Scrapp_Photos/product_pictures/
+Web_Scrapp_Photos/
+
+# Variables de entorno
+.env
+*.env
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Instalaciones de Cython
+*.so
+
+# Archivos de distribución / paquetes
+*.egg-info/
+*.egg
+dist/
+build/
+*.dist-info/
+*.pyd
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.sublime-workspace
+
+# Logs y bases de datos
+*.log
+*.sqlite3
+
+# Archivos de prueba
+*.mo
+*.pot
+
+# Entornos específicos de Python
+*.venv
