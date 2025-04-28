@@ -24,7 +24,7 @@ class MiasCatalogCreator:
         self.page_height = 2500
         self.main_image_width = int(self.page_width * 0.65)
         self.main_image_height = self.page_height
-        self.circle_diameter = 450
+        self.circle_diameter = 400  # Updated circle size
         self.circle_margin = 50
         
         # Colors
@@ -32,6 +32,7 @@ class MiasCatalogCreator:
         self.black = (0, 0, 0)
         self.teal = (100, 180, 180)
         self.pink = (255, 150, 150)
+        self.border_color = (137, 213, 201)  # #89d5c9
         
     def extract_product_info(self, filename):
         """Extract product info from filename pattern: {name}-{price}-{number}"""
@@ -50,11 +51,15 @@ class MiasCatalogCreator:
                 groups = match.groups()
                 if len(groups) == 3:
                     name, price, number = groups
-                    return name, f"${int(price):,}".replace(',', '.'), int(number)
+                    # Divide price by 10 to get the correct value
+                    price_int = int(price) // 10
+                    return name, f"${price_int:,}".replace(',', '.'), int(number)
                 elif len(groups) == 4:
                     # Handle pattern with code
                     name, code, price, number = groups
-                    return f"{name} {code}", f"${int(price):,}".replace(',', '.'), int(number)
+                    # Divide price by 10 to get the correct value
+                    price_int = int(price) // 10
+                    return f"{name} {code}", f"${price_int:,}".replace(',', '.'), int(number)
         
         # If no pattern matches, try a simple split
         parts = filename.split('-')
@@ -63,7 +68,9 @@ class MiasCatalogCreator:
             price = parts[-2]
             number = parts[-1]
             try:
-                return name, f"${int(price):,}".replace(',', '.'), int(number)
+                # Divide price by 10 to get the correct value
+                price_int = int(price) // 10
+                return name, f"${price_int:,}".replace(',', '.'), int(number)
             except ValueError:
                 pass
         
@@ -92,11 +99,18 @@ class MiasCatalogCreator:
         
         return groups
     
-    def create_circular_mask(self, size):
-        """Create a circular mask for circular images"""
+    def create_circular_mask(self, size, border_only=False):
+        """Create a circular mask or border for images"""
         mask = Image.new('L', (size, size), 0)
         draw = ImageDraw.Draw(mask)
-        draw.ellipse((0, 0, size, size), fill=255)
+        
+        if border_only:
+            # Draw only the border circle with 3px width
+            draw.ellipse((0, 0, size-1, size-1), outline=255, width=3)
+        else:
+            # Fill the entire circle
+            draw.ellipse((0, 0, size-1, size-1), fill=255)
+            
         return mask
     
     def extract_top_center_portion(self, image, target_size):
@@ -116,43 +130,59 @@ class MiasCatalogCreator:
     
     def add_logo(self, canvas):
         """Add Mias Moda logo to the canvas"""
-        logo_width = 400
-        logo_height = 200
-        
-        # Create logo area
-        logo_area = Image.new('RGBA', (logo_width, logo_height), (255, 255, 255, 0))
-        draw = ImageDraw.Draw(logo_area)
-        
-        # Draw "Mias" in pink
         try:
-            font_large = ImageFont.truetype("arial.ttf", 100)
-            font_small = ImageFont.truetype("arial.ttf", 30)
-        except:
+            # Load the logo image
+            logo_path = Path(__file__).parent / "LOGO_MIAS_MODA.webp"
+            logo = Image.open(logo_path)
+            
+            # Calculate position (100px from right, 20px from top)
+            logo_x = self.page_width - logo.width - 100
+            logo_y = 20
+            
+            # Paste the logo
+            if logo.mode == 'RGBA':
+                # If the logo has transparency, use it as mask
+                canvas.paste(logo, (logo_x, logo_y), logo)
+            else:
+                # If no transparency, paste without mask
+                canvas.paste(logo, (logo_x, logo_y))
+                
+        except Exception as e:
+            print(f"Error loading logo: {e}")
+            # Fallback to text-based logo if image fails to load
+            logo_width = 400
+            logo_height = 200
+            logo_area = Image.new('RGBA', (logo_width, logo_height), (255, 255, 255, 0))
+            draw = ImageDraw.Draw(logo_area)
+            
             try:
-                font_large = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", 100)
-                font_small = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", 30)
+                font_large = ImageFont.truetype("arial.ttf", 100)
+                font_small = ImageFont.truetype("arial.ttf", 30)
             except:
-                # Fallback to default font
-                font_large = ImageFont.load_default()
-                font_small = ImageFont.load_default()
-        
-        draw.text((10, 10), "Mias", fill=self.pink, font=font_large)
-        draw.text((10, 110), "MODA", fill=self.teal, font=font_large)
-        draw.text((10, 160), "HECHO EN COLOMBIA", fill=self.pink, font=font_small)
-        
-        # Place logo in top right corner
-        logo_x = self.page_width - logo_width - 50
-        logo_y = 50
-        canvas.paste(logo_area, (logo_x, logo_y), logo_area)
+                try:
+                    font_large = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", 100)
+                    font_small = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", 30)
+                except:
+                    font_large = ImageFont.load_default()
+                    font_small = ImageFont.load_default()
+            
+            # draw.text((10, 10), "Mias", fill=self.pink, font=font_large)
+            # draw.text((10, 110), "MODA", fill=self.teal, font=font_large)
+            # draw.text((10, 160), "HECHO EN COLOMBIA", fill=self.pink, font=font_small)
+            
+            # Place logo in top right corner
+            logo_x = self.page_width - logo_width - 100
+            logo_y = 20
+            canvas.paste(logo_area, (logo_x, logo_y), logo_area)
     
     def add_product_info(self, canvas, name, price):
         """Add product name and price to the canvas"""
         try:
-            font_name = ImageFont.truetype("arial.ttf", 60)
+            font_name = ImageFont.truetype("arial.ttf", 80)
             font_price = ImageFont.truetype("arial.ttf", 80)
         except:
             try:
-                font_name = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", 60)
+                font_name = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", 80)
                 font_price = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", 80)
             except:
                 font_name = ImageFont.load_default()
@@ -160,40 +190,49 @@ class MiasCatalogCreator:
         
         draw = ImageDraw.Draw(canvas)
         
-        # Create info box
-        info_x = 50
-        info_y = self.page_height - 200
+        # Calculate text size for the box
+        bbox = font_name.getbbox(name)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
         
-        # Draw teal background box
-        box_width = 600
-        box_height = 150
+        # Add padding around text
+        padding = 20
+        
+        # Draw product name box with teal color at y=2280
+        name_box_x = 100
+        name_box_y = 2280  # Updated from 2300 to 2280
         draw.rectangle(
-            [info_x, info_y, info_x + box_width, info_y + box_height],
-            fill=self.teal
+            [
+                name_box_x, 
+                name_box_y, 
+                name_box_x + text_width + (padding * 2), 
+                name_box_y + text_height + (padding * 2)
+            ],
+            fill=self.border_color  # Using the teal color #89d5c9
         )
         
-        # Draw product name
-        draw.text((info_x + 20, info_y + 20), f"{name}", fill=self.black, font=font_name)
+        # Draw product name centered in the box
+        name_x = name_box_x + padding
+        name_y = name_box_y + padding
+        draw.text((name_x, name_y), name, fill=self.black, font=font_name)
         
-        # Draw price in white box
-        price_box_x = info_x + 20
-        price_box_y = info_y + 80
+        # Position the price box
+        price_box_x = 220
+        price_box_y = 2390
         price_box_width = 300
-        price_box_height = 50
+        price_box_height = 80
         
+        # Draw white background for price
         draw.rectangle(
             [price_box_x, price_box_y, price_box_x + price_box_width, price_box_y + price_box_height],
             fill=self.white
         )
-        draw.text((price_box_x + 10, price_box_y + 5), price, fill=self.black, font=font_price)
         
-        # Add color indicators if needed
-        color_text_x = info_x + box_width + 20
-        color_text_y = info_y + box_height - 40
-        if name.lower() == "nubia":
-            draw.text((color_text_x, color_text_y), "AZUL / BLANCO", fill=self.black, font=font_name)
-        elif name.lower() == "patricia":
-            draw.text((color_text_x, color_text_y), "NEGRO / GUAYABA", fill=self.black, font=font_name)
+        # Draw price text - adjust Y position to center in taller box
+        bbox = font_price.getbbox(price)
+        text_height = bbox[3] - bbox[1]
+        price_y_offset = (price_box_height - text_height) // 2
+        draw.text((price_box_x + 10, price_box_y + price_y_offset), price, fill=self.black, font=font_price)
     
     def create_catalog_page(self, product_group, name, price):
         """Create a catalog page for a product group"""
@@ -214,33 +253,49 @@ class MiasCatalogCreator:
             )
             canvas.paste(main_image, (0, 0))
         
-        # Add circular detail images (2-6)
-        circle_x_start = self.main_image_width + 100
-        circle_y_start = 600
-        
-        circle_mask = self.create_circular_mask(self.circle_diameter)
-        
-        for idx, (number, img_path) in enumerate(images[1:5]):  # Get up to 4 additional images
-            img = Image.open(img_path)
+        # Add circular detail images (2-4) in vertical line
+        if len(images) > 1:
+            circle_diameter = 402  # 201px radius * 2
             
-            # Extract top center portion for circular view
-            top_portion = self.extract_top_center_portion(img, self.circle_diameter)
+            # Position circles 100px from right edge
+            circle_x = self.page_width - circle_diameter - 100
             
-            # Create circular image
-            circular_img = Image.new('RGBA', (self.circle_diameter, self.circle_diameter), (0, 0, 0, 0))
-            circular_img.paste(top_portion, (0, 0))
-            circular_img.putalpha(circle_mask)
+            # Start at 600px from top
+            start_y = 600
             
-            # Position circles vertically with some spacing
-            circle_x = circle_x_start
-            circle_y = circle_y_start + (idx * (self.circle_diameter + self.circle_margin))
+            # Create masks
+            circle_mask = self.create_circular_mask(circle_diameter)
+            border_mask = self.create_circular_mask(circle_diameter, border_only=True)
             
-            # If more than 2 circles, create a second column
-            if idx >= 2:
-                circle_x = circle_x_start + self.circle_diameter + self.circle_margin
-                circle_y = circle_y_start + ((idx - 2) * (self.circle_diameter + self.circle_margin))
-            
-            canvas.paste(circular_img, (circle_x, circle_y), circular_img)
+            for idx, (number, img_path) in enumerate(images[1:4]):  # Get up to 3 additional images
+                img = Image.open(img_path)
+                
+                # Extract top center portion for circular view
+                top_portion = self.extract_top_center_portion(img, circle_diameter)
+                
+                # Create circular image
+                circular_img = Image.new('RGBA', (circle_diameter, circle_diameter), (0, 0, 0, 0))
+                
+                # Create the inner circular image
+                inner_img = Image.new('RGBA', (circle_diameter, circle_diameter), (0, 0, 0, 0))
+                inner_img.paste(top_portion, (0, 0))
+                inner_img.putalpha(circle_mask)
+                
+                # Add the image to the final composition
+                circular_img.paste(inner_img, (0, 0), inner_img)
+                
+                # Add the border
+                border_img = Image.new('RGBA', (circle_diameter, circle_diameter), (0, 0, 0, 0))
+                border_draw = ImageDraw.Draw(border_img)
+                border_draw.ellipse((0, 0, circle_diameter-1, circle_diameter-1), outline=self.border_color, width=3)
+                
+                # Combine image and border
+                circular_img.paste(border_img, (0, 0), border_mask)
+                
+                # Calculate vertical position
+                circle_y = start_y + idx * (circle_diameter + 50)  # 50px margin between circles
+                
+                canvas.paste(circular_img, (circle_x, circle_y), circular_img)
         
         # Add logo
         self.add_logo(canvas)

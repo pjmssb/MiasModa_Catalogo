@@ -7,12 +7,16 @@ This project consists of two Python applications that work together to automate 
    - Implements rate limiting to prevent server overload
    - Organizes downloaded images with structured naming (product name + price)
    - Handles pagination and duplicate products gracefully
+   - In the sample_product_pictures there are several scrapped pictures obtained with this process
 
 2. **Catalog Creator** (`Create_catalog/`)
    - Processes the downloaded product images
    - Automatically generates catalog-ready images with consistent formatting
    - Organizes output in a structured directory system
    - Supports batch processing of multiple images
+   - In the sample_new_catalog you may find the catalog pictures for the scrapped pictures in the sample_product_pictures
+
+
 
 ## Project Structure
 
