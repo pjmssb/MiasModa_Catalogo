@@ -50,6 +50,13 @@ Each application has its own setup process and dependencies. Please refer to the
 - Python 3.6+
 - See individual requirements.txt files in each application directory for specific dependencies
 
+## Technical Documentation
+
+For detailed technical documentation about the system's architecture, implementation details, and advanced usage, please visit:
+[MiasModa Catalog Creation System Documentation](https://deepwiki.com/pjmssb/MiasModa_Catalogo/3-catalog-creation-system)
+
+The technical documentation has been automatically generated using the DeepWiki Generative AI service, ensuring comprehensive and up-to-date documentation of the system's components and functionality.
+
 ## License
 
 This project is intended for internal use by Mias Moda only.
